@@ -37,7 +37,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        Item i = data.get(position);
+        Item i = data.get(holder.getAdapterPosition());
 
         holder.tvDesc.setText(i.getDesc());
         holder.tvDate.setText(i.getDateAndTime().toString());
@@ -73,8 +73,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                AlertDialog.Builder addDialog = new AlertDialog.Builder(MainActivity.this);
+            public boolean onLongClick(View view) {
+                AlertDialog.Builder addDialog = new AlertDialog.Builder(context);
                 addDialog.setTitle("Edit or delete item");
                 View v = LayoutInflater
                         .from(context)
@@ -110,15 +110,15 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
                         i.setDateAndTime(today);
                         Toast.makeText(context, "Record updated", Toast.LENGTH_SHORT).show();
 
-                        notifyDataSetChanged();
-
+                        notifyItemChanged(holder.getAdapterPosition());
                     }
                 });
                 addDialog.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MyApplication.items.remove(position);
-                        notifyDataSetChanged();
+                        int pos = holder.getAdapterPosition();
+                        MyApplication.items.remove(pos);
+                        notifyItemRemoved(pos);
                         Toast.makeText(context, "Record deleted", Toast.LENGTH_SHORT).show();
                     }
                 });
