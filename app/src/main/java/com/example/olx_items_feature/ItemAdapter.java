@@ -1,23 +1,30 @@
 package com.example.olx_items_feature;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> {
     ArrayList<Item> data;
+    Context context;
 
     public ItemAdapter(Context c, ArrayList<Item> data)
     {
         this.data= data;
+        context = c;
     }
 
     @NonNull
@@ -31,6 +38,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Item i = data.get(position);
+
         holder.tvDesc.setText(i.getDesc());
         holder.tvDate.setText(i.getDateAndTime().toString());
         holder.tvLocation.setText(i.getLocation());
@@ -60,6 +68,64 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.MyViewHolder> 
                 {
                     holder.ivFav.setImageResource(R.drawable.icon_fav_hollow);
                 }
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder addDialog = new AlertDialog.Builder(MainActivity.this);
+                addDialog.setTitle("Edit or delete item");
+                View v = LayoutInflater
+                        .from(context)
+                        .inflate(R.layout.add_item_form, null, false);
+                addDialog.setView(v);
+                EditText etName = v.findViewById(R.id.etNAme);
+                EditText etUrl = v.findViewById(R.id.etImgUrl);
+                EditText etAddress = v.findViewById(R.id.etAddress);
+                EditText etDesc = v.findViewById(R.id.etDesc);
+                EditText etPrice = v.findViewById(R.id.etPrice);
+                etName.setText(i.getName());
+                etUrl.setText(i.getUrl());
+                etDesc.setText(i.getDesc());
+                etPrice.setText(i.getPrice()+"");
+                etAddress.setText(i.getLocation());
+
+                addDialog.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String name = etName.getText().toString().trim();
+                        String url = etUrl.getText().toString().trim();
+                        String desc = etDesc.getText().toString().trim();
+                        String price = etPrice.getText().toString().trim();
+                        String address = etAddress.getText().toString().trim();
+                        Date today = new Date();
+
+                        // String url, String name, String desc, String location, Date dateAndTime, boolean fav, float price
+                        i.setName(name);
+                        i.setDesc(desc);
+                        i.setLocation(address);
+                        i.setPrice(Float.parseFloat(price));
+                        i.setUrl(url);
+                        i.setDateAndTime(today);
+                        Toast.makeText(context, "Record updated", Toast.LENGTH_SHORT).show();
+
+                        notifyDataSetChanged();
+
+                    }
+                });
+                addDialog.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MyApplication.items.remove(position);
+                        notifyDataSetChanged();
+                        Toast.makeText(context, "Record deleted", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                addDialog.show();
+
+                return false;
             }
         });
 
